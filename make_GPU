@@ -1,0 +1,4 @@
+nvcc -o CRM CRM.cu Rate_Functions_GPU.cu Rate_Functions_CPU.c -I/compilers/cuda/7.5.18/1/default/include -I. -lineinfo -arch=sm_20 --ptxas-options=-v --use_fast_math \
+-I/libraries/lapack/3.5.0/2/default/include \
+-L/compilers/cuda/7.5.18/1/default/lib64 -L/libraries/lapack/3.5.0/2/default/lib \
+-lgsl -lgslcblas -lm -llapacke -llapack -lcudart -lblas -lcurand -lgfortran -Xcompiler=-fopenmp

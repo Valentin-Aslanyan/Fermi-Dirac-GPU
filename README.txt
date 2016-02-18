@@ -1,16 +1,20 @@
-This code is intended to demonstrate numerical quadratures on GPUs, in particular the efficient calculation of atomic rates by integrals over the Fermi-Dirac distribution. A simple collisional-radiative model is presented here The code is split into a CPU-only and CPU+GPU parts. Simple makefiles are provided.
-For details, contact Valentin Aslanyan, va567 (at) york.ac.uk
+This code is intended to demonstrate numerical quadratures on GPUs, in particular the efficient calculation of atomic rates by integrals over the Fermi-Dirac distribution. A simple collisional-radiative model is presented here. The code is split into a CPU-only and CPU+GPU parts. Simple makefiles are provided.
+For details, contact Valentin Aslanyan.
 
 The following files are included here:
 
 ---------------------------
-Generic GPU integration	  |
+| Generic GPU integration |
 ---------------------------
 
+Quadrature.cu		-	Example of numerical integration on a GPU using the Gauss-Legnedre method.
+
+make_Quadrature		-	makefile for Quadrature.cu
+
 
 
 ---------------------------
-CPU only Atomic Rates	  |
+|  CPU only Atomic Rates  |
 ---------------------------
 
 Rate_Functions_CPU.h	-	Header file
@@ -27,9 +31,9 @@ make_Maxwellian		-	analogous to make_CPU
 
 
 
---------------------------
-CPU +  GPU Atomic Rates  |
---------------------------
+---------------------------
+| CPU +  GPU Atomic Rates |
+---------------------------
 
 Rate_Functions_GPU.h	-	Header file
 
@@ -37,4 +41,4 @@ Rate_Functions_GPU.cu	-	Contains functions specific only to the GPU, including c
 
 CRM.cu			-  	Main file implementing time-dependent collisional radiative model, identical to the CPU-only version, but the rate coefficients are calculated at each timestep on the GPU and memory-copied to main memory to carry out RK4 on the CPU
 
-make_GPU		-	makefile for CRM.cu, compiling with nvcc (nVidia compiler) and requiring also the same libraries as make_CPU
+make_GPU		-	makefile for CRM.cu, compiling with nvcc (nVidia compiler) and requiring also the same libraries as make_CPU as well as CUDA libraries. Paths to those libraries may need to be changed by the user

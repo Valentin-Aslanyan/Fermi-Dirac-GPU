@@ -213,7 +213,7 @@ double h_ib_int(double EGamma,double T_e,double mu,double T_r)
 //Set up the nodes (x) and weights (w) of Gaussian quadrature, using the Golub Welsch algorithm
 //coeffs and vectors are allocated arrays which are required only for solving the tridiagonal matrix equation
 void gauss_integration_setup(int datapoints, double *weights, double *x,double *coeffs, double *vectors)
-{  int idx; //int info;
+{  int idx;
 
    x[0]=0.0;
    for (idx=1;idx<datapoints;idx++)
@@ -222,12 +222,12 @@ void gauss_integration_setup(int datapoints, double *weights, double *x,double *
 	coeffs[idx-1]=0.5/sqrt(1.0-1.0/(4.0*idx*idx));
 	}	
 
-   //dstev finds the eigenvalues and vectors of a symmetric 
+   //dstev finds the eigenvalues and vectors of a symmetric matrix
    LAPACKE_dstev(LAPACK_ROW_MAJOR,'v', datapoints, x, coeffs, vectors, datapoints);
 
    for (idx=0;idx<datapoints;idx++)
 	{
-	x[idx]=0.5*(x[idx]+1.0);
+	x[idx]=0.5*(x[idx]+1.0);	//This leads to nodes in the range (0,1)
 	weights[idx]=vectors[idx]*vectors[idx];
 	}
 }
