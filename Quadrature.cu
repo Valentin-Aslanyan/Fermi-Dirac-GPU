@@ -8,10 +8,19 @@
 #include <lapacke_mangling.h>
 #include <lapacke_utils.h>
 
-//The prefix h_ corresponds to host (namely, CPU)
-//The prefix d_ corresponds to device (namely, GPU)
+/*
+Here we demonstrate the calculation of single and double integrals on GPUs using CUDA
+The prefix h_ corresponds to host (namely, CPU)
+The prefix d_ corresponds to device (namely, GPU)
+Specifically, we evaluate the integrals:
+\int_3^5  A \theta^2 + \exp(B\theta) d\theta			(1)
+\int_3^5 \int_2^10  A \phi\exp(B\theta\phi) d\theta d\phi	(2)
+A and B are constants, stored in h_params[] and d_params[]
+The limits are stored in h_limits[] and d_limits[]
+*/
 
-//The following two functions carry out a single integral of the function d_integrand1()
+
+//The following two functions carry out a single integral (1)
 __device__ double d_integrand1(double *d_params,double theta)
 {
 	double integrand=d_params[0]*theta*theta+d_params[1]*exp(theta);
@@ -45,13 +54,20 @@ __global__ void d_single_integral(double *d_params, double *d_limits, double *d_
     }
 }
 
+//Exact, analytic solution
+double h_integral1_exact(double *h_params, double *h_limits)
+{
+	return h_params[0]*(h_limits[1]*h_limits[1]*h_limits[1]-h_limits[0]*h_limits[0]*h_limits[0])/3.0+h_params[1]*(exp(h_params[1]*h_limits[1])-exp(h_params[1]*h_limits[0]))
+}
+
+
+//Two functions to carry out double integral (2)
 __device__ double d_integrand2(double *d_params,double theta,double phi)
 {
-	double integrand=d_params[0]*theta*phi+d_params[1]*exp(theta+phi);
+	double integrand=d_params[0]*phi*exp(d_params[0]*theta*phi);
 	return integrand;
 }
 
-//Carry out a double integral for the collisional ionization coefficient
 //Involves now two reductions and the intermediate results stored in main GPU memory
 __global__ void d_double_integral(double *d_params, double *d_limits, double *d_result,double *d_result_part, double *d_w, double *d_x)
 {	
@@ -151,5 +167,13 @@ int main(int argc,const char** argv)
 	cudaMemcpy(d_x,h_x,sizeof(double)*h_datapoints,cudaMemcpyHostToDevice);
 	cudaMemcpy(d_w,h_w,sizeof(double)*h_datapoints,cudaMemcpyHostToDevice);
 
+	//Integral-specific constants
+	int number_of_integrals=20;
+	double *h_params, *d_params, *h_lims1, *h_lims2, *d_lims1, *d_lims2;
+	h_params=(double*)malloc(sizeof(double)*number_of_integrals*2);
+	h_lims1=(double*)malloc(sizeof(double)*2);
+	h_lims2=(double*)malloc(sizeof(double)*4);
+	cudaMalloc((void **)d_lims1,sizeof(double)*2);
+	cudaMalloc((void **)d_lims2,sizeof(double)*4);
 
 }
