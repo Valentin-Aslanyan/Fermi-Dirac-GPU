@@ -1,4 +1,5 @@
-This code is intended to demonstrate numerical quadratures on GPUs, in particular the efficient calculation of atomic rates by integrals over the Fermi-Dirac distribution. A simple collisional-radiative model is presented here. The code is split into a CPU-only and CPU+GPU parts. Simple makefiles are provided.
+This code is intended to demonstrate numerical quadratures on GPUs, in particular the efficient calculation of atomic rates by integrals over the Fermi-Dirac distribution. A simple collisional-radiative model is presented here. The code is split into a CPU-only and CPU+GPU parts. Simple makefiles are provided. Please note that the paths to libraries in the CUDA makefiles should be changed by the user.
+
 For details, contact Valentin Aslanyan.
 
 The following files are included here:
@@ -9,7 +10,7 @@ The following files are included here:
 
 Quadrature.cu		-	Example of numerical integration on a GPU using the Gauss-Legnedre method.
 
-make_Quadrature		-	makefile for Quadrature.cu
+make_Quadrature		-	makefile for Quadrature.cu, compiling with nvcc (nVidia compiler)
 
 
 
