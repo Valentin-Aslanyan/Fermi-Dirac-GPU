@@ -54,7 +54,7 @@ __global__ void d_j_calc(double *d_params, double *E_j, double *B_vector, double
 	int tid=threadIdx.x;
 	extern  __shared__ double temp[];	//Integrand is stored in shared memory
 	double *d_j_up_temp=&temp[0];
-	double lim=(20.0+(5.7+2.13*ACC_P)*d_params[0]);
+	double lim=(20.0+ACC_J*d_params[0]);
 	double E0=x[tid]*lim+E_j[blockIdx.x];
 	double integrand=d_j_int(E0,E_j[blockIdx.x],B_vector+blockIdx.x*4)*w[tid];
 	double fermi=1.0/(1.0+exp((E0-d_params[1])/d_params[0]));
@@ -85,7 +85,7 @@ __global__ void d_k_calc(double *d_params, double *E_i, double *C_vector,double 
 	int tid=threadIdx.x, d;
 	extern  __shared__ double temp[];
 	double *d_k_up_temp=&temp[0];
-	double lim=(30.0+(12.0+2.31*ACC_P)*d_params[0]);
+	double lim=(30.0+ACC_K*d_params[0]);
 	double E0prime=x[tid]*lim;
 	double E0=E0prime+E_i[blockIdx.y];
 	double E1=x[blockIdx.x]*E0prime;

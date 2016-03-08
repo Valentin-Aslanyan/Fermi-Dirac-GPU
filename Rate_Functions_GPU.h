@@ -1,10 +1,9 @@
 #ifndef RATE_FUNCTIONS_GPU
 #define RATE_FUNCTIONS_GPU
 
-#define ACC_P 5
+#define ACC_J 16.35
+#define ACC_K 23.55
 #define ACC_L 6503.0
-#define ACC_IB1 6.5
-#define ACC_IB2 15.0
 
 __device__ double d_j_int(double E0,double E_j,double *B_vector);
 
