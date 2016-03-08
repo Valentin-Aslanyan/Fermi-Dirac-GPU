@@ -15,7 +15,7 @@ The prefix h_ corresponds to host (namely, CPU)
 The prefix d_ corresponds to device (namely, GPU)
 Specifically, we evaluate the integrals:
 \int_3^5  A \theta^2 + \exp(B\theta) d\theta			(1)
-\int_3^5 \int_1^2  A \phi\exp(B\theta\phi) d\theta d\phi	(2)
+\int_3^5 \int_1^2  A \phi+B\theta^2 d\theta d\phi	(2)
 A and B are constants, stored in h_params[] and d_params[]
 The limits are stored in h_limits[] and d_limits[]
 */
@@ -25,6 +25,12 @@ The limits are stored in h_limits[] and d_limits[]
 __device__ double d_integrand1(double *d_params,double theta)
 {
 	double integrand=d_params[0]*theta*theta+exp(d_params[1]*theta);
+	return integrand;
+}
+
+double h_integrand1(double *h_params,double theta)
+{
+	double integrand=h_params[0]*theta*theta+exp(h_params[1]*theta);
 	return integrand;
 }
 
@@ -65,7 +71,13 @@ double h_integral1_exact(double *h_params, double *h_limits)
 //Two functions to carry out double integral (2)
 __device__ double d_integrand2(double *d_params,double theta,double phi)
 {
-	double integrand=d_params[0]*phi+d_params[1]*theta*theta;	//d_params[0]*phi*exp(d_params[1]*theta*phi);
+	double integrand=d_params[0]*phi+d_params[1]*theta*theta;
+	return integrand;
+}
+
+double h_integrand2(double *h_params,double theta,double phi)
+{
+	double integrand=h_params[0]*phi+h_params[1]*theta*theta;
 	return integrand;
 }
 
@@ -125,8 +137,7 @@ __global__ void d_double_integral(double *d_params, double *d_limits, double *d_
 //Exact, analytic solution
 double h_integral2_exact(double *h_params, double *h_limits)
 {
-	return h_params[0]*(h_limits[3]*h_limits[3]-h_limits[2]*h_limits[2])/2.0+h_params[1]*(h_limits[1]*h_limits[1]*h_limits[1]-h_limits[0]*h_limits[0]*h_limits[0])/3.0;
-	//h_params[0]/h_params[1]/h_params[1]*( (exp(h_params[1]*h_limits[1]*h_limits[3])-exp(h_params[1]*h_limits[1]*h_limits[2]))/h_limits[1] - (exp(h_params[1]*h_limits[0]*h_limits[3])-exp(h_params[1]*h_limits[0]*h_limits[2]))/h_limits[0]);
+	return h_params[0]*(h_limits[3]*h_limits[3]-h_limits[2]*h_limits[2])*(h_limits[1]-h_limits[0])/2.0+h_params[1]*(h_limits[1]*h_limits[1]*h_limits[1]-h_limits[0]*h_limits[0]*h_limits[0])*(h_limits[3]-h_limits[2])/3.0;
 }
 
 
@@ -178,14 +189,15 @@ int main(int argc,const char** argv)
 	cudaMemcpy(d_w,h_w,sizeof(double)*h_datapoints,cudaMemcpyHostToDevice);
 
 	//Allocate integral-specific constants, limits of integration
-	int number_of_integrals=20;
-	double *h_params, *d_params, *h_lims1, *h_lims2, *d_lims1, *d_lims2, *h_result, *d_result_part, *d_result;
+	int number_of_integrals=20, idx, idx1, idx2;
+	double *h_params, *d_params, *h_lims1, *h_lims2, *d_lims1, *d_lims2, *h_result, *h_result2, *d_result_part, *d_result, h_theta, h_phi, h_lim, h_lim1, h_lim2;
 	h_params=(double*)malloc(sizeof(double)*number_of_integrals*2);
 	h_lims1=(double*)malloc(sizeof(double)*2);
 	h_lims2=(double*)malloc(sizeof(double)*4);
 	h_lims1[0]=3.0; h_lims1[1]=5.0;
 	h_lims2[0]=3.0; h_lims2[1]=5.0; h_lims2[2]=1.0; h_lims2[3]=2.0;
 	h_result=(double*)malloc(sizeof(double)*number_of_integrals*2);
+	h_result2=(double*)malloc(sizeof(double)*number_of_integrals*2);
 	dim3 grid_dim(h_datapoints,number_of_integrals);
 	cudaMalloc((void **)&d_params,sizeof(double)*number_of_integrals*2);
 	cudaMalloc((void **)&d_lims1,sizeof(double)*2);
@@ -221,12 +233,36 @@ int main(int argc,const char** argv)
 
 	cudaEventRecord(stop);
 	cudaEventElapsedTime(&d_time, start, stop);
+
+	//CPU integral evaluation
+	h_lim=h_lims1[1]-h_lims1[0];
+	h_lim1=h_lims2[1]-h_lims2[0];
+	h_lim2=h_lims2[3]-h_lims2[2];
+	for(idx=0;idx<number_of_integrals;idx++)
+		{
+		h_result2[idx]=0.0;
+		h_result2[idx+number_of_integrals]=0.0;
+		for(idx1=0;idx1<h_datapoints;idx1++)
+			{
+			h_theta=h_x[idx1]*h_lim+h_lims1[0];
+			h_result2[idx]+=h_integrand1(h_params+idx*2,h_theta)*h_w[idx1]*h_lim;
+
+			h_theta=h_x[idx1]*h_lim1+h_lims2[0];
+			for(idx2=0;idx2<h_datapoints;idx2++)
+				{
+				h_phi=h_x[idx2]*h_lim2+h_lims2[2];
+				h_result2[idx+number_of_integrals]+=h_integrand2(h_params+idx*2,h_theta,h_phi)*h_w[idx1]*h_w[idx2]*h_lim1*h_lim2;
+				}
+			}
+		}
 	
 	//Print result
-	printf("Time elapsed: %f\n",d_time);
-	for(int idx=0;idx<number_of_integrals;idx++)
+	printf("GPU time elapsed: %f\n",d_time);
+	printf("           Single Integral            |           Double Integral\n");
+	printf("    GPU     |    CPU     |   Exact    |    GPU     |    CPU     |   Exact \n");
+	for(idx=0;idx<number_of_integrals;idx++)
 		{
-		printf("%E %E %E %E\n",h_result[idx],h_integral1_exact(h_params+idx*2,h_lims1),h_result[idx+number_of_integrals],h_integral2_exact(h_params+idx*2,h_lims2));
+		printf("%E %E %E %E %E %E\n",h_result[idx],h_result2[idx],h_integral1_exact(h_params+idx*2,h_lims1),h_result[idx+number_of_integrals],h_result2[idx+number_of_integrals],h_integral2_exact(h_params+idx*2,h_lims2));
 		}
 
    //Clean up
