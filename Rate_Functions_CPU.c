@@ -347,13 +347,13 @@ double h_ib_gauss_integration(double T_e, double n_e,double mu,double T_r, int s
 }
 
 //CPU memory allocation
-void h_allocate_arrays(int states_number, int ionizations_number, int excitations_number, int h_datapoints, double **h_params, double **charge_vector, double **E_i,double **E_j,double **A_vector,double **B_vector1, double **B_vector2, double **C_vector, double **D_vector, double **h_j, double **h_k, double **h_l, double **h_w, double **h_x, double **h_c, double **h_v, double **N, double **N_temp1, double **N_temp2, double **N_temp3, double **N_temp4, double **IntE_temp, double **R_1, double **R_2, int **excitations_indices, int **ionizations_indices)
+void h_allocate_arrays(int states_number, int ionizations_number, int excitations_number, int h_datapoints, double **h_params, double **charge_vector, double **E_i,double **E_j,double **A_vector,double **B_vector, double **C_vector, double **D_vector, double **h_j, double **h_k, double **h_l, double **h_w, double **h_x, double **h_c, double **h_v, double **N, double **N_temp1, double **N_temp2, double **N_temp3, double **N_temp4, double **IntE_temp, double **R_1, double **R_2, int **excitations_indices, int **ionizations_indices)
 { int idx1, idx2;
 *h_params=(double*)malloc(2*sizeof(double));
 *E_i=(double*)malloc(ionizations_number*sizeof(double));
 *E_j=(double*)malloc(excitations_number*sizeof(double));
 *A_vector=(double*)malloc(excitations_number*sizeof(double));
-*B_vector1=(double*)malloc(excitations_number*4*sizeof(double));
+*B_vector=(double*)malloc(excitations_number*4*sizeof(double));
 *C_vector=(double*)malloc(ionizations_number*5*sizeof(double));
 *D_vector=(double*)malloc(ionizations_number*2*sizeof(double));
 *h_j=(double*)malloc(excitations_number*sizeof(double));
@@ -384,7 +384,7 @@ for(idx1=0;idx1<states_number;idx1++)
 }
 
 //Populate the relevant arrays with values specific to an atomic model 
-void h_setup_atomic_model(int ionizations_number, int excitations_number,int *excitations_indices,int *ionizations_indices, double *charge_vector, double *E_i, double *E_j, double *A_vector, double *B_vector1, double *C_vector, double *D_vector)
+void h_setup_atomic_model(int ionizations_number, int excitations_number,int *excitations_indices,int *ionizations_indices, double *charge_vector, double *E_i, double *E_j, double *A_vector, double *B_vector, double *C_vector, double *D_vector)
 {
 int idx;
 
@@ -437,36 +437,36 @@ excitations_indices[12]=191;excitations_indices[26]=177;
 excitations_indices[13]=205;excitations_indices[27]=163;
 
 //Coefficients for excitation cross section
-B_vector1[0]=1.393000E-01;	B_vector1[1]=-7.979000E-02;	B_vector1[2]=1.057000E-01;	B_vector1[3]=2.630000E-03;
-B_vector1[4]=7.078345E+01;	B_vector1[5]=3.952529E+01;	B_vector1[6]=9.925136E+01;	B_vector1[7]=-2.871901E+01;
-B_vector1[8]=1.687015E+02;	B_vector1[9]=5.317823E+01;	B_vector1[10]=2.015390E+02;	B_vector1[11]=-4.346805E+01;
-B_vector1[12]=1.582396E+01;	B_vector1[13]=-1.274900E+01;	B_vector1[14]=2.527637E+01;	B_vector1[15]=-6.928126E+00;
-B_vector1[16]=5.332000E-01;	B_vector1[17]=-2.181000E-01;	B_vector1[18]=4.292000E-01;	B_vector1[19]=-8.999000E-02;
-B_vector1[20]=2.345149E-02;	B_vector1[21]=-7.918600E-03;	B_vector1[22]=8.853680E-03;	B_vector1[23]=1.186270E-02;
-B_vector1[24]=1.012000E+00;	B_vector1[25]=9.015000E-01;	B_vector1[26]=1.081000E+00;	B_vector1[27]=-2.239000E-01;
-B_vector1[28]=6.215553E-01;	B_vector1[29]=-3.925198E-01;	B_vector1[30]=5.820666E-01;	B_vector1[31]=3.439001E-02;
-B_vector1[32]=1.413465E+02;	B_vector1[33]=8.125362E+01;	B_vector1[34]=2.686247E+02;	B_vector1[35]=-9.678118E+01;
-B_vector1[36]=3.901087E+00;	B_vector1[37]=-9.877649E-01;	B_vector1[38]=2.454189E+00;	B_vector1[39]=7.424383E-01;
-B_vector1[40]=2.997265E+02;	B_vector1[41]=1.240335E+02;	B_vector1[42]=5.146290E+02;	B_vector1[43]=-1.742407E+02;
-B_vector1[44]=2.857600E+00;	B_vector1[45]=2.633000E+00;	B_vector1[46]=3.919000E+00;	B_vector1[47]=-9.664000E-01;
-B_vector1[48]=9.041080E-01;	B_vector1[49]=8.940613E-01;	B_vector1[50]=7.836745E-01;	B_vector1[51]=-2.640410E-02;
-B_vector1[52]=9.889809E-01;	B_vector1[53]=-7.141192E-01;	B_vector1[54]=1.130646E+00;	B_vector1[55]=-8.393918E-02;
+B_vector[0]=1.393000E-01;	B_vector[1]=-7.979000E-02;	B_vector[2]=1.057000E-01;	B_vector[3]=2.630000E-03;
+B_vector[4]=7.078345E+01;	B_vector[5]=3.952529E+01;	B_vector[6]=9.925136E+01;	B_vector[7]=-2.871901E+01;
+B_vector[8]=1.687015E+02;	B_vector[9]=5.317823E+01;	B_vector[10]=2.015390E+02;	B_vector[11]=-4.346805E+01;
+B_vector[12]=1.582396E+01;	B_vector[13]=-1.274900E+01;	B_vector[14]=2.527637E+01;	B_vector[15]=-6.928126E+00;
+B_vector[16]=5.332000E-01;	B_vector[17]=-2.181000E-01;	B_vector[18]=4.292000E-01;	B_vector[19]=-8.999000E-02;
+B_vector[20]=2.345149E-02;	B_vector[21]=-7.918600E-03;	B_vector[22]=8.853680E-03;	B_vector[23]=1.186270E-02;
+B_vector[24]=1.012000E+00;	B_vector[25]=9.015000E-01;	B_vector[26]=1.081000E+00;	B_vector[27]=-2.239000E-01;
+B_vector[28]=6.215553E-01;	B_vector[29]=-3.925198E-01;	B_vector[30]=5.820666E-01;	B_vector[31]=3.439001E-02;
+B_vector[32]=1.413465E+02;	B_vector[33]=8.125362E+01;	B_vector[34]=2.686247E+02;	B_vector[35]=-9.678118E+01;
+B_vector[36]=3.901087E+00;	B_vector[37]=-9.877649E-01;	B_vector[38]=2.454189E+00;	B_vector[39]=7.424383E-01;
+B_vector[40]=2.997265E+02;	B_vector[41]=1.240335E+02;	B_vector[42]=5.146290E+02;	B_vector[43]=-1.742407E+02;
+B_vector[44]=2.857600E+00;	B_vector[45]=2.633000E+00;	B_vector[46]=3.919000E+00;	B_vector[47]=-9.664000E-01;
+B_vector[48]=9.041080E-01;	B_vector[49]=8.940613E-01;	B_vector[50]=7.836745E-01;	B_vector[51]=-2.640410E-02;
+B_vector[52]=9.889809E-01;	B_vector[53]=-7.141192E-01;	B_vector[54]=1.130646E+00;	B_vector[55]=-8.393918E-02;
 
 //Coefficients for differential cross section
-C_vector[0]=3.71000E+00*E_i[0];		C_vector[1]=-2.36000E+00*0;	C_vector[2]=2.35000E+00;	C_vector[3]=-6.60000E-01;	C_vector[4]=0.00000E+00;
-C_vector[5]=3.71000E+00*E_i[1];		C_vector[6]=-2.36000E+00*0;	C_vector[7]=2.35000E+00;	C_vector[8]=-6.60000E-01;	C_vector[9]=0.00000E+00;
-C_vector[10]=3.71000E+00*E_i[2];	C_vector[11]=-2.36000E+00*0;	C_vector[12]=2.35000E+00;	C_vector[13]=-6.60000E-01;	C_vector[14]=0.00000E+00;
-C_vector[15]=3.71000E+00*E_i[3];	C_vector[16]=-2.36000E+00*0;	C_vector[17]=2.35000E+00;	C_vector[18]=-6.60000E-01;	C_vector[19]=0.00000E+00;
-C_vector[20]=3.71000E+00*E_i[4];	C_vector[21]=-2.36000E+00*0;	C_vector[22]=2.35000E+00;	C_vector[23]=-6.60000E-01;	C_vector[24]=0.00000E+00;
-C_vector[25]=2.79400E+00*E_i[5];	C_vector[26]=4.69000E-01*0;	C_vector[27]=-1.29400E+01;	C_vector[28]=2.62600E+01;	C_vector[29]=-1.34300E+01;
-C_vector[30]=2.79400E+00*E_i[6];	C_vector[31]=4.69000E-01*0;	C_vector[32]=-1.29400E+01;	C_vector[33]=2.62600E+01;	C_vector[34]=-1.34300E+01;
-C_vector[35]=2.79400E+00*E_i[7];	C_vector[36]=4.69000E-01*0;	C_vector[37]=-1.29400E+01;	C_vector[38]=2.62600E+01;	C_vector[39]=-1.34300E+01;
-C_vector[40]=2.79400E+00*E_i[8];	C_vector[41]=4.69000E-01*0;	C_vector[42]=-1.29400E+01;	C_vector[43]=2.62600E+01;	C_vector[44]=-1.34300E+01;
-C_vector[45]=2.79400E+00*E_i[9];	C_vector[46]=4.69000E-01*0;	C_vector[47]=-1.29400E+01;	C_vector[48]=2.62600E+01;	C_vector[49]=-1.34300E+01;
-C_vector[50]=2.41900E+00*E_i[10];	C_vector[51]=-1.32000E+00*0;	C_vector[52]=1.70000E+00;	C_vector[53]=0.00000E+00;	C_vector[54]=0.00000E+00;
-C_vector[55]=2.41900E+00*E_i[11];	C_vector[56]=-1.32000E+00*0;	C_vector[57]=1.70000E+00;	C_vector[58]=0.00000E+00;	C_vector[59]=0.00000E+00;
-C_vector[60]=2.41900E+00*E_i[12];	C_vector[61]=-1.32000E+00*0;	C_vector[62]=1.70000E+00;	C_vector[63]=0.00000E+00;	C_vector[64]=0.00000E+00;
-C_vector[65]=2.41900E+00*E_i[13];	C_vector[66]=-1.32000E+00*0;	C_vector[67]=1.70000E+00;	C_vector[68]=0.00000E+00;	C_vector[69]=0.00000E+00;
+C_vector[0]=3.71000E+00*E_i[0];		C_vector[1]=-2.36000E-01;	C_vector[2]=2.35000E+00;	C_vector[3]=-6.60000E-01;	C_vector[4]=0.00000E+00;
+C_vector[5]=3.71000E+00*E_i[1];		C_vector[6]=-2.36000E-01;	C_vector[7]=2.35000E+00;	C_vector[8]=-6.60000E-01;	C_vector[9]=0.00000E+00;
+C_vector[10]=3.71000E+00*E_i[2];	C_vector[11]=-2.36000E-01;	C_vector[12]=2.35000E+00;	C_vector[13]=-6.60000E-01;	C_vector[14]=0.00000E+00;
+C_vector[15]=3.71000E+00*E_i[3];	C_vector[16]=-2.36000E-01;	C_vector[17]=2.35000E+00;	C_vector[18]=-6.60000E-01;	C_vector[19]=0.00000E+00;
+C_vector[20]=3.71000E+00*E_i[4];	C_vector[21]=-2.36000E-01;	C_vector[22]=2.35000E+00;	C_vector[23]=-6.60000E-01;	C_vector[24]=0.00000E+00;
+C_vector[25]=2.79400E+00*E_i[5];	C_vector[26]=4.69000E-01;	C_vector[27]=-1.29400E+01;	C_vector[28]=2.62600E+01;	C_vector[29]=-1.34300E+01;
+C_vector[30]=2.79400E+00*E_i[6];	C_vector[31]=4.69000E-01;	C_vector[32]=-1.29400E+01;	C_vector[33]=2.62600E+01;	C_vector[34]=-1.34300E+01;
+C_vector[35]=2.79400E+00*E_i[7];	C_vector[36]=4.69000E-01;	C_vector[37]=-1.29400E+01;	C_vector[38]=2.62600E+01;	C_vector[39]=-1.34300E+01;
+C_vector[40]=2.79400E+00*E_i[8];	C_vector[41]=4.69000E-01;	C_vector[42]=-1.29400E+01;	C_vector[43]=2.62600E+01;	C_vector[44]=-1.34300E+01;
+C_vector[45]=2.79400E+00*E_i[9];	C_vector[46]=4.69000E-01;	C_vector[47]=-1.29400E+01;	C_vector[48]=2.62600E+01;	C_vector[49]=-1.34300E+01;
+C_vector[50]=2.41900E+00*E_i[10];	C_vector[51]=-1.32000E-01;	C_vector[52]=1.70000E+00;	C_vector[53]=0.00000E+00;	C_vector[54]=0.00000E+00;
+C_vector[55]=2.41900E+00*E_i[11];	C_vector[56]=-1.32000E-01;	C_vector[57]=1.70000E+00;	C_vector[58]=0.00000E+00;	C_vector[59]=0.00000E+00;
+C_vector[60]=2.41900E+00*E_i[12];	C_vector[61]=-1.32000E-01;	C_vector[62]=1.70000E+00;	C_vector[63]=0.00000E+00;	C_vector[64]=0.00000E+00;
+C_vector[65]=2.41900E+00*E_i[13];	C_vector[66]=-1.32000E-01;	C_vector[67]=1.70000E+00;	C_vector[68]=0.00000E+00;	C_vector[69]=0.00000E+00;
 
 //Coefficients for the photoionization cross section
 D_vector[0]=5.682286E-18*E_i[0]*E_i[0];		D_vector[1]=3.941713E-19*E_i[0]*E_i[0]*E_i[0];
@@ -484,7 +484,7 @@ D_vector[22]=7.897529E-19*E_i[11]*E_i[11];	D_vector[23]=1.390636E-18*E_i[11]*E_i
 D_vector[24]=7.897529E-19*E_i[12]*E_i[12];	D_vector[25]=1.390636E-18*E_i[12]*E_i[12]*E_i[12];
 D_vector[26]=7.897529E-19*E_i[13]*E_i[13];	D_vector[27]=1.390636E-18*E_i[13]*E_i[13]*E_i[13];
 
- for(idx=0;idx<excitations_number*4;idx++) {B_vector1[idx]*=4.831E14;}
+ for(idx=0;idx<excitations_number*4;idx++) {B_vector[idx]*=4.831E14;}
  for(idx=0;idx<ionizations_number*5;idx++) {C_vector[idx]*=4.036E16;}
  for(idx=0;idx<ionizations_number*2;idx++) {D_vector[idx]*=3.94286E+23;}
 }
@@ -533,7 +533,7 @@ void h_create_rate_matrices(int states_number, int ionizations_number, int excit
 // (2) Calculate atomic rates
 // (3) Populate rate matrices
 // (4) Calculate the temporary increment k_1 or k_2 etc
-void h_solve_RK4(int states_number, int ionizations_number, int excitations_number, double delta, double *charge_vector, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *n_e, double *T_e, double *T_F, double *Internal_Energy,int h_datapoints, double *h_w, double *h_x, double *h_j, double *h_k, double *h_l, double T_r, int *excitations_indices, int *ionizations_indices, double *E_i, double *E_j,double *A_vector, double *B_vector1, double *C_vector, double *D_vector, double *R_1, double *R_2)
+void h_solve_RK4(int states_number, int ionizations_number, int excitations_number, double delta, double *charge_vector, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *n_e, double *T_e, double *T_F, double *Internal_Energy,int h_datapoints, double *h_w, double *h_x, double *h_j, double *h_k, double *h_l, double T_r, int *excitations_indices, int *ionizations_indices, double *E_i, double *E_j,double *A_vector, double *B_vector, double *C_vector, double *D_vector, double *R_1, double *R_2)
 {	
 	//Declare variables, copy current values to temporary arrays
 	double n_e_temp, T_F_temp, T_e_temp, delta_2=0.5*delta, Int_energy_temp1, Int_energy_temp2, Int_energy_temp3, Int_energy_temp4, mu, ib_E;
@@ -544,7 +544,7 @@ void h_solve_RK4(int states_number, int ionizations_number, int excitations_numb
 
 	//Coefficients 1
 	mu=Get_Chemical_Potential(*T_e,*T_F);
-	h_j_gauss_integration_full(excitations_number,*T_e,mu,E_j,B_vector1,h_datapoints,h_j,h_w,h_x);
+	h_j_gauss_integration_full(excitations_number,*T_e,mu,E_j,B_vector,h_datapoints,h_j,h_w,h_x);
 	h_k_gauss_integration_full(ionizations_number,*T_e,mu,E_i,C_vector,h_datapoints,h_k,h_w,h_x);
 	h_l_gauss_integration_full(ionizations_number,*T_e,mu,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=h_ib_gauss_integration(*T_e,*n_e,mu,T_r,states_number,charge_vector,N,h_datapoints,h_w,h_x);
@@ -558,7 +558,7 @@ void h_solve_RK4(int states_number, int ionizations_number, int excitations_numb
 	T_F_temp=Fermi_Energy(n_e_temp);
 	T_e_temp=T_F_temp*Invert_C_V(Int_energy_temp1/(T_F_temp*n_e_temp));
 	mu=Get_Chemical_Potential(T_e_temp,T_F_temp);
-	h_j_gauss_integration_full(excitations_number,T_e_temp,mu,E_j,B_vector1,h_datapoints,h_j,h_w,h_x);
+	h_j_gauss_integration_full(excitations_number,T_e_temp,mu,E_j,B_vector,h_datapoints,h_j,h_w,h_x);
 	h_k_gauss_integration_full(ionizations_number,T_e_temp,mu,E_i,C_vector,h_datapoints,h_k,h_w,h_x);
 	h_l_gauss_integration_full(ionizations_number,T_e_temp,mu,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=h_ib_gauss_integration(T_e_temp,n_e_temp,mu,T_r,states_number,charge_vector,N_temp1,h_datapoints,h_w,h_x);
@@ -572,7 +572,7 @@ void h_solve_RK4(int states_number, int ionizations_number, int excitations_numb
 	T_F_temp=Fermi_Energy(n_e_temp);
 	T_e_temp=T_F_temp*Invert_C_V(Int_energy_temp2/(T_F_temp*n_e_temp));
 	mu=Get_Chemical_Potential(T_e_temp,T_F_temp);
-	h_j_gauss_integration_full(excitations_number,T_e_temp,mu,E_j,B_vector1,h_datapoints,h_j,h_w,h_x);
+	h_j_gauss_integration_full(excitations_number,T_e_temp,mu,E_j,B_vector,h_datapoints,h_j,h_w,h_x);
 	h_k_gauss_integration_full(ionizations_number,T_e_temp,mu,E_i,C_vector,h_datapoints,h_k,h_w,h_x);
 	h_l_gauss_integration_full(ionizations_number,T_e_temp,mu,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=h_ib_gauss_integration(T_e_temp,n_e_temp,mu,T_r,states_number,charge_vector,N_temp2,h_datapoints,h_w,h_x);
@@ -586,7 +586,7 @@ void h_solve_RK4(int states_number, int ionizations_number, int excitations_numb
 	T_F_temp=Fermi_Energy(n_e_temp);
 	T_e_temp=T_F_temp*Invert_C_V(Int_energy_temp3/(T_F_temp*n_e_temp));
 	mu=Get_Chemical_Potential(T_e_temp,T_F_temp);
-	h_j_gauss_integration_full(excitations_number,T_e_temp,mu,E_j,B_vector1,h_datapoints,h_j,h_w,h_x);
+	h_j_gauss_integration_full(excitations_number,T_e_temp,mu,E_j,B_vector,h_datapoints,h_j,h_w,h_x);
 	h_k_gauss_integration_full(ionizations_number,T_e_temp,mu,E_i,C_vector,h_datapoints,h_k,h_w,h_x);
 	h_l_gauss_integration_full(ionizations_number,T_e_temp,mu,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=h_ib_gauss_integration(T_e_temp,n_e_temp,mu,T_r,states_number,charge_vector,N_temp3,h_datapoints,h_w,h_x);
@@ -605,6 +605,35 @@ void h_solve_RK4(int states_number, int ionizations_number, int excitations_numb
 	*n_e=Get_n_e(states_number,N,charge_vector);
 	*T_F=Fermi_Energy(*n_e);
 	*T_e=*T_F*Invert_C_V(*Internal_Energy/(*T_F* *n_e));
+}
+
+void h_cleanup(double *h_params, double *charge_vector, double *E_i,double *E_j,double *A_vector,double *B_vector, double *C_vector, double *D_vector, double *h_j, double *h_k, double *h_l, double *h_w, double *h_x, double *h_c, double *h_v, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *R_1, double *R_2, int *excitations_indices, int *ionizations_indices)
+{
+	free(h_params);
+	free(charge_vector);
+	free(E_i);
+	free(E_j);
+	free(A_vector);
+	free(B_vector);
+	free(C_vector);
+	free(D_vector);
+	free(h_j);
+	free(h_k);
+	free(h_l);
+	free(h_w);
+	free(h_x);
+	free(h_c);
+	free(h_v);
+	free(N);
+	free(N_temp1);
+	free(N_temp2);
+	free(N_temp3);
+	free(N_temp4);
+	free(IntE_temp);
+	free(R_1);
+	free(R_2);
+	free(excitations_indices);
+	free(ionizations_indices);
 }
 
 ///////////////////////////////////////////
@@ -699,6 +728,7 @@ for  (idx_l=0;idx_l<ionizations_number;idx_l++)
 	l_up_maxwellian(T_e,E_i[idx_l],T_r,D_vector+idx_l*2,datapoints,h_l+idx_l,h_l+ionizations_number+idx_l,weights,x);
 	}
 }
+
 double ib_maxwellian(double T_e, double n_e,double T_r, int states_number, double *charge_vector, double *N, int datapoints, double *weights, double *x)
 {	double integrand=0.0, start=3.71075E-13*sqrt(n_e), end, EGamma; int idx;
 	end=(T_r/T_e)*11.66;
@@ -755,7 +785,7 @@ void create_rate_matrices_maxwellian(int states_number, int ionizations_number, 
 
 //RK-4 solver for Maxwell-Boltzmann statistics
 //Uses analytic integrals above and the usual heat capacity C_V=1.5*T_e
-void solve_RK4_maxwellian(int states_number, int ionizations_number, int excitations_number, double delta, double *charge_vector, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *n_e, double *T_e, double *Internal_Energy,int h_datapoints, double *h_w, double *h_x, double *h_j, double *h_k, double *h_l, double T_r, int *excitations_indices, int *ionizations_indices, double *E_i, double *E_j,double *A_vector, double *B_vector1, double *C_vector, double *D_vector, double *R_1, double *R_2)
+void solve_RK4_maxwellian(int states_number, int ionizations_number, int excitations_number, double delta, double *charge_vector, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *n_e, double *T_e, double *Internal_Energy,int h_datapoints, double *h_w, double *h_x, double *h_j, double *h_k, double *h_l, double T_r, int *excitations_indices, int *ionizations_indices, double *E_i, double *E_j,double *A_vector, double *B_vector, double *C_vector, double *D_vector, double *R_1, double *R_2)
 {	
 	//Copy to temporary arrays
 	double n_e_temp, T_e_temp, delta_2=0.5*delta, Int_energy_temp1, Int_energy_temp2, Int_energy_temp3, Int_energy_temp4, ib_E;
@@ -765,7 +795,7 @@ void solve_RK4_maxwellian(int states_number, int ionizations_number, int excitat
 	cblas_dcopy(states_number,N,1,N_temp4,1);
 
 	//Coefficients 1
-	j_maxwellian_full(excitations_number,*T_e,E_j,B_vector1,h_j);
+	j_maxwellian_full(excitations_number,*T_e,E_j,B_vector,h_j);
 	k_maxwellian_full(ionizations_number,*T_e,E_i,C_vector,h_k);
 	l_maxwellian_full(ionizations_number,*T_e,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=ib_maxwellian(*T_e,*n_e,T_r,states_number,charge_vector,N,h_datapoints,h_w,h_x);
@@ -777,7 +807,7 @@ void solve_RK4_maxwellian(int states_number, int ionizations_number, int excitat
 	//Coefficients 2
 	n_e_temp=Get_n_e(states_number,N_temp1,charge_vector);
 	T_e_temp=0.6666666666666667*Int_energy_temp1/n_e_temp;
-	j_maxwellian_full(excitations_number,T_e_temp,E_j,B_vector1,h_j);
+	j_maxwellian_full(excitations_number,T_e_temp,E_j,B_vector,h_j);
 	k_maxwellian_full(ionizations_number,T_e_temp,E_i,C_vector,h_k);
 	l_maxwellian_full(ionizations_number,T_e_temp,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=ib_maxwellian(T_e_temp,n_e_temp,T_r,states_number,charge_vector,N_temp1,h_datapoints,h_w,h_x);
@@ -789,7 +819,7 @@ void solve_RK4_maxwellian(int states_number, int ionizations_number, int excitat
 	//Coefficients 3
 	n_e_temp=Get_n_e(states_number,N_temp2,charge_vector);
 	T_e_temp=0.6666666666666667*Int_energy_temp2/n_e_temp;
-	j_maxwellian_full(excitations_number,T_e_temp,E_j,B_vector1,h_j);
+	j_maxwellian_full(excitations_number,T_e_temp,E_j,B_vector,h_j);
 	k_maxwellian_full(ionizations_number,T_e_temp,E_i,C_vector,h_k);
 	l_maxwellian_full(ionizations_number,T_e_temp,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=ib_maxwellian(T_e_temp,n_e_temp,T_r,states_number,charge_vector,N_temp2,h_datapoints,h_w,h_x);
@@ -801,7 +831,7 @@ void solve_RK4_maxwellian(int states_number, int ionizations_number, int excitat
 	//Coefficients 4
 	n_e_temp=Get_n_e(states_number,N_temp3,charge_vector);
 	T_e_temp=0.6666666666666667*Int_energy_temp3/n_e_temp;
-	j_maxwellian_full(excitations_number,T_e_temp,E_j,B_vector1,h_j);
+	j_maxwellian_full(excitations_number,T_e_temp,E_j,B_vector,h_j);
 	k_maxwellian_full(ionizations_number,T_e_temp,E_i,C_vector,h_k);
 	l_maxwellian_full(ionizations_number,T_e_temp,T_r,E_i,D_vector,h_datapoints,h_l,h_w,h_x);
 	ib_E=ib_maxwellian(T_e_temp,n_e_temp,T_r,states_number,charge_vector,N_temp3,h_datapoints,h_w,h_x);

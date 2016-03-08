@@ -89,6 +89,7 @@ for (idx_t=0;idx_t<=t_iterations;idx_t+=output_frequency)
 
 //Clean up memory
 d_cleanup(d_params,d_B_vector1, d_C_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x, d_w);
+h_cleanup(h_params, charge_vector, E_i, E_j,A_vector,B_vector, C_vector, D_vector, h_j, h_k, h_l, h_w, h_x, h_c, h_v, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp,  R_1, R_2, excitations_indices, ionizations_indices);
 
 exit(0);
 }

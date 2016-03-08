@@ -75,5 +75,8 @@ for (idx_t=0;idx_t<=t_iterations;idx_t+=output_frequency)
 	fprintf(OUTPUTFILE,"%E %E %E\n",idx_t*delta_time,T_e[idx_t],n_e[idx_t]);
 	}
 
+//Clean up memory
+h_cleanup(h_params, charge_vector, E_i, E_j,A_vector,B_vector, C_vector, D_vector, h_j, h_k, h_l, h_w, h_x, h_c, h_v, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp,  R_1, R_2, excitations_indices, ionizations_indices);
+
 exit(0);
 }

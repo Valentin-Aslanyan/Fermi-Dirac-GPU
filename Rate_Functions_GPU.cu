@@ -168,10 +168,10 @@ __global__ void d_l_calc(double *d_params, double *E_i, double *D_vector, double
     }
 }
 
-void d_setup(double **d_params, double **d_B_vector1, double **d_C_vector, double **d_D_vector, double **d_E_j, double **d_E_i, double **d_j, double **d_k, double **d_k_part, double **d_l, double **d_x, double **d_w, double *B_vector1, double *C_vector, double *D_vector, double *E_j, double *E_i, double T_r, double *h_x, double *h_w, int ionizations_number, int excitations_number, int h_datapoints, cudaStream_t *streams)
+void d_setup(double **d_params, double **d_B_vector, double **d_C_vector, double **d_D_vector, double **d_E_j, double **d_E_i, double **d_j, double **d_k, double **d_k_part, double **d_l, double **d_x, double **d_w, double *B_vector, double *C_vector, double *D_vector, double *E_j, double *E_i, double T_r, double *h_x, double *h_w, int ionizations_number, int excitations_number, int h_datapoints, cudaStream_t *streams)
 {
 cudaMalloc((void **)d_params,sizeof(double)*2);
-cudaMalloc((void **)d_B_vector1,sizeof(double)*excitations_number*4);
+cudaMalloc((void **)d_B_vector,sizeof(double)*excitations_number*4);
 cudaMalloc((void **)d_C_vector,sizeof(double)*ionizations_number*5);
 cudaMalloc((void **)d_D_vector,sizeof(double)*ionizations_number*2);
 cudaMalloc((void **)d_E_j,sizeof(double)*excitations_number);
@@ -187,7 +187,7 @@ cudaMemcpyToSymbol(d_ionizations_number,&ionizations_number,sizeof(ionizations_n
 cudaMemcpyToSymbol(d_excitations_number,&excitations_number,sizeof(excitations_number));
 cudaMemcpyToSymbol(d_datapoints,&h_datapoints,sizeof(h_datapoints));
 cudaMemcpyToSymbol(d_T_r,&T_r,sizeof(T_r));
-cudaMemcpy(*d_B_vector1,B_vector1,sizeof(double)*excitations_number*4,cudaMemcpyHostToDevice);
+cudaMemcpy(*d_B_vector,B_vector,sizeof(double)*excitations_number*4,cudaMemcpyHostToDevice);
 cudaMemcpy(*d_C_vector,C_vector,sizeof(double)*ionizations_number*5,cudaMemcpyHostToDevice);
 cudaMemcpy(*d_D_vector,D_vector,sizeof(double)*ionizations_number*2,cudaMemcpyHostToDevice);
 cudaMemcpy(*d_E_j,E_j,sizeof(double)*excitations_number,cudaMemcpyHostToDevice);
@@ -199,10 +199,10 @@ cudaStreamCreate(&streams[0]);
 cudaStreamCreate(&streams[1]);
 }
 
-void d_cleanup(double *d_params, double *d_B_vector1, double *d_C_vector, double *d_E_j, double *d_E_i, double *d_j, double *d_k, double *d_k_part, double *d_l, double *d_x, double *d_w)
+void d_cleanup(double *d_params, double *d_B_vector, double *d_C_vector, double *d_E_j, double *d_E_i, double *d_j, double *d_k, double *d_k_part, double *d_l, double *d_x, double *d_w)
 {
    cudaFree(d_params);
-   cudaFree(d_B_vector1);
+   cudaFree(d_B_vector);
    cudaFree(d_C_vector);
    cudaFree(d_E_j);
    cudaFree(d_E_i);
@@ -215,12 +215,12 @@ void d_cleanup(double *d_params, double *d_B_vector1, double *d_C_vector, double
    cudaDeviceReset();
 }
 
-void d_calculate_rates(double *d_params,double *d_B_vector1, double *d_C_vector, double *d_D_vector, double *d_E_j, double *d_E_i, double *d_j, double *d_k, double *d_k_part, double *d_l, double *d_x, double *d_w,double *h_params, double *h_j,double *h_k,double *h_l,double *h_w, double *h_x,double *ib_E, double n_e, double T_r, double *charge_vector, double *N, int states_number, int ionizations_number,int excitations_number,int h_datapoints,cudaStream_t *streams)
+void d_calculate_rates(double *d_params,double *d_B_vector, double *d_C_vector, double *d_D_vector, double *d_E_j, double *d_E_i, double *d_j, double *d_k, double *d_k_part, double *d_l, double *d_x, double *d_w,double *h_params, double *h_j,double *h_k,double *h_l,double *h_w, double *h_x,double *ib_E, double n_e, double T_r, double *charge_vector, double *N, int states_number, int ionizations_number,int excitations_number,int h_datapoints,cudaStream_t *streams)
 {	
 	dim3 grid_dim(h_datapoints,ionizations_number);
 	cudaMemcpy(d_params,h_params,sizeof(double)*2,cudaMemcpyHostToDevice);
 	d_k_calc<<<grid_dim,h_datapoints,h_datapoints*sizeof(double),streams[1]>>>(d_params,d_E_i,d_C_vector,d_k,d_k_part,d_w,d_x);
-	d_j_calc<<<excitations_number,h_datapoints,h_datapoints*sizeof(double),streams[0]>>>(d_params,d_E_j,d_B_vector1,d_j,d_w,d_x);
+	d_j_calc<<<excitations_number,h_datapoints,h_datapoints*sizeof(double),streams[0]>>>(d_params,d_E_j,d_B_vector,d_j,d_w,d_x);
 	d_l_calc<<<ionizations_number,h_datapoints,2*h_datapoints*sizeof(double),streams[0]>>>(d_params,d_E_i,d_D_vector,d_l,d_l+ionizations_number,d_w,d_x);
 	*ib_E=h_ib_gauss_integration(h_params[0],n_e,h_params[1],T_r,states_number,charge_vector,N,h_datapoints,h_w,h_x);
 	cudaMemcpyAsync(h_j,d_j,sizeof(double)*excitations_number,cudaMemcpyDeviceToHost,streams[0]);
@@ -230,7 +230,7 @@ void d_calculate_rates(double *d_params,double *d_B_vector1, double *d_C_vector,
 
 //This is the RK-4 solver using GPUs to calculate atomic rates
 //See h_solve_RK4 in Rate_Functions_CPU.c for more details
-void hd_solve_RK4(int states_number, int ionizations_number, int excitations_number, double delta, double *charge_vector, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *n_e, double *T_e, double *T_F, double *Internal_Energy,int h_datapoints, double *h_w, double *h_x, double *h_j, double *h_k, double *h_l, double T_r, int *excitations_indices, int *ionizations_indices, double *E_i, double *E_j,double *A_vector, double *B_vector1, double *C_vector, double *D_vector, double *R_1, double *R_2, double *h_params, double *d_params, double *d_B_vector1, double *d_C_vector, double *d_D_vector, double *d_E_j, double *d_E_i, double *d_j, double *d_k, double *d_k_part, double *d_l, double *d_x, double *d_w,cudaStream_t *streams)
+void hd_solve_RK4(int states_number, int ionizations_number, int excitations_number, double delta, double *charge_vector, double *N, double *N_temp1, double *N_temp2, double *N_temp3, double *N_temp4, double *IntE_temp, double *n_e, double *T_e, double *T_F, double *Internal_Energy,int h_datapoints, double *h_w, double *h_x, double *h_j, double *h_k, double *h_l, double T_r, int *excitations_indices, int *ionizations_indices, double *E_i, double *E_j,double *A_vector, double *B_vector, double *C_vector, double *D_vector, double *R_1, double *R_2, double *h_params, double *d_params, double *d_B_vector, double *d_C_vector, double *d_D_vector, double *d_E_j, double *d_E_i, double *d_j, double *d_k, double *d_k_part, double *d_l, double *d_x, double *d_w,cudaStream_t *streams)
 {	//RK-4 method, N_t[n+1] = N_t[n]+Delta_t/6*(k_1+2k_2+2k_3+k_4)
 	//Declare variables, copy current values to temporary arrays
 	double n_e_temp, T_F_temp, T_e_temp, delta_2=0.5*delta, Int_energy_temp1, Int_energy_temp2, Int_energy_temp3, Int_energy_temp4, ib_E;
@@ -242,7 +242,7 @@ void hd_solve_RK4(int states_number, int ionizations_number, int excitations_num
 	//Coefficients 1
 	h_params[0]=*T_e;
 	h_params[1]=Get_Chemical_Potential(*T_e,*T_F);
-	d_calculate_rates(d_params,d_B_vector1, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,*n_e,T_r,charge_vector,N, states_number, ionizations_number,excitations_number,h_datapoints,streams);
+	d_calculate_rates(d_params,d_B_vector, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,*n_e,T_r,charge_vector,N, states_number, ionizations_number,excitations_number,h_datapoints,streams);
 	h_create_rate_matrices(states_number,ionizations_number,excitations_number,*T_e,*n_e,h_params[1] ,R_1,R_2,h_j,h_k, h_l,excitations_indices, ionizations_indices,E_i,E_j);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta_2,R_1,states_number,N,1,1.0,N_temp1,1);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta_2,R_2,states_number,N,1,0.0,IntE_temp,1);
@@ -254,7 +254,7 @@ void hd_solve_RK4(int states_number, int ionizations_number, int excitations_num
 	T_e_temp=T_F_temp*Invert_C_V(Int_energy_temp1/(T_F_temp*n_e_temp));
 	h_params[0]=T_e_temp;
 	h_params[1]=Get_Chemical_Potential(T_e_temp,T_F_temp);
-	d_calculate_rates(d_params,d_B_vector1, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,n_e_temp,T_r,charge_vector,N_temp1, states_number, ionizations_number,excitations_number,h_datapoints,streams);
+	d_calculate_rates(d_params,d_B_vector, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,n_e_temp,T_r,charge_vector,N_temp1, states_number, ionizations_number,excitations_number,h_datapoints,streams);
 	h_create_rate_matrices(states_number,ionizations_number,excitations_number,T_e_temp,n_e_temp,h_params[1],R_1,R_2,h_j,h_k,h_l,excitations_indices,ionizations_indices,E_i,E_j);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta_2,R_1,states_number,N_temp1,1,1.0,N_temp2,1);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta_2,R_2,states_number,N_temp1,1,0.0,IntE_temp,1);
@@ -266,7 +266,7 @@ void hd_solve_RK4(int states_number, int ionizations_number, int excitations_num
 	T_e_temp=T_F_temp*Invert_C_V(Int_energy_temp2/(T_F_temp*n_e_temp));
 	h_params[0]=T_e_temp;
 	h_params[1]=Get_Chemical_Potential(T_e_temp,T_F_temp);
-	d_calculate_rates(d_params,d_B_vector1, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,n_e_temp,T_r,charge_vector,N_temp2, states_number, ionizations_number,excitations_number,h_datapoints,streams);
+	d_calculate_rates(d_params,d_B_vector, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,n_e_temp,T_r,charge_vector,N_temp2, states_number, ionizations_number,excitations_number,h_datapoints,streams);
 	h_create_rate_matrices(states_number,ionizations_number,excitations_number,T_e_temp,n_e_temp,h_params[1],R_1,R_2,h_j,h_k,h_l,excitations_indices,ionizations_indices,E_i,E_j);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta,R_1,states_number,N_temp2,1,1.0,N_temp3,1);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta,R_2,states_number,N_temp2,1,0.0,IntE_temp,1);
@@ -278,7 +278,7 @@ void hd_solve_RK4(int states_number, int ionizations_number, int excitations_num
 	T_e_temp=T_F_temp*Invert_C_V(Int_energy_temp3/(T_F_temp*n_e_temp));
 	h_params[0]=T_e_temp;
 	h_params[1]=Get_Chemical_Potential(T_e_temp,T_F_temp);
-	d_calculate_rates(d_params,d_B_vector1, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,n_e_temp,T_r,charge_vector,N_temp3, states_number, ionizations_number,excitations_number,h_datapoints,streams);
+	d_calculate_rates(d_params,d_B_vector, d_C_vector,d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x,  d_w,h_params,h_j,h_k,h_l,h_w,h_x,&ib_E,n_e_temp,T_r,charge_vector,N_temp3, states_number, ionizations_number,excitations_number,h_datapoints,streams);
 	h_create_rate_matrices(states_number,ionizations_number,excitations_number,T_e_temp,n_e_temp,h_params[1],R_1,R_2,h_j,h_k,h_l,excitations_indices,ionizations_indices,E_i,E_j);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta_2,R_1,states_number,N_temp3,1,-1.0,N_temp4,1);
 	cblas_dgemv(CblasRowMajor,CblasNoTrans,states_number,states_number,delta_2,R_2,states_number,N_temp2,1,0.0,IntE_temp,1);
