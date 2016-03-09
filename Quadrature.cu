@@ -193,7 +193,7 @@ int main(int argc,const char** argv)
 	cudaMemcpy(d_w,h_w,sizeof(double)*h_datapoints,cudaMemcpyHostToDevice);
 
 	//Allocate integral-specific constants, limits of integration
-	int number_of_integrals=2, idx, idx1, idx2;
+	int number_of_integrals=20, idx, idx1, idx2;
 	double *h_params, *d_params, *h_lims1, *h_lims2, *d_lims1, *d_lims2, *h_result, *h_result2, *d_result_part, *d_result, h_theta, h_phi, h_lim, h_lim1, h_lim2;
 	h_params=(double*)malloc(sizeof(double)*number_of_integrals*2);
 	h_lims1=(double*)malloc(sizeof(double)*2);
