@@ -114,6 +114,7 @@ __global__ void d_k_calc(double *d_params, double *E_i, double *C_vector,double 
     }
 	tid=threadIdx.x+blockDim.x*blockIdx.y;
 
+	__syncthreads();
 
 	//Reduction over the second integral to obtain a value for the full double integral
     if(blockIdx.x==0)

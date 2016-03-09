@@ -111,13 +111,16 @@ __global__ void d_double_integral(double *d_params, double *d_limits, double *d_
     {	
 	d_result_part[blockIdx.x+gridDim.x*blockIdx.y]=d_result_temp[tid];
     }
-	tid=threadIdx.x+blockDim.x*blockIdx.y;
 
+	__syncthreads();
+
+	tid=threadIdx.x+blockDim.x*blockIdx.y;
 
 	//Reduction over the second integral to obtain a value for the full double integral
     if(blockIdx.x==0)
     {
 	d_result_temp[threadIdx.x]=d_result_part[tid];
+
  	   for (d = blockDim.x>>1; d > 0; d >>= 1)
  	   {
  	     __syncthreads(); 
@@ -172,6 +175,9 @@ int main(int argc,const char** argv)
 	int device_count=0;
 	cudaGetDeviceCount(&device_count);
 	cudaSetDevice(0);	//Run on device 0 by default - can be changed if multiple GPUs etc are present
+	cudaStream_t streams[2];
+	cudaStreamCreate(&streams[0]);
+	cudaStreamCreate(&streams[1]);
 
 	//Declare, allocate and calculate nodes and weights for integration
 	double *h_x,*h_w,*h_c,*h_v;
@@ -189,7 +195,7 @@ int main(int argc,const char** argv)
 	cudaMemcpy(d_w,h_w,sizeof(double)*h_datapoints,cudaMemcpyHostToDevice);
 
 	//Allocate integral-specific constants, limits of integration
-	int number_of_integrals=20, idx, idx1, idx2;
+	int number_of_integrals=2, idx, idx1, idx2;
 	double *h_params, *d_params, *h_lims1, *h_lims2, *d_lims1, *d_lims2, *h_result, *h_result2, *d_result_part, *d_result, h_theta, h_phi, h_lim, h_lim1, h_lim2;
 	h_params=(double*)malloc(sizeof(double)*number_of_integrals*2);
 	h_lims1=(double*)malloc(sizeof(double)*2);
@@ -226,8 +232,8 @@ int main(int argc,const char** argv)
 	//Copy parameters
 	cudaMemcpy(d_params,h_params,sizeof(double)*number_of_integrals*2,cudaMemcpyHostToDevice);
 	//Do both integrals (on default stream in this case)
-	d_single_integral<<<number_of_integrals,h_datapoints,h_datapoints*sizeof(double)>>>(d_params,d_lims1,d_result,d_w,d_x);
-	d_double_integral<<<grid_dim,h_datapoints,h_datapoints*sizeof(double)>>>(d_params,d_lims2,d_result+number_of_integrals,d_result_part,d_w,d_x);
+	d_single_integral<<<number_of_integrals,h_datapoints,h_datapoints*sizeof(double),streams[0]>>>(d_params,d_lims1,d_result,d_w,d_x);
+	d_double_integral<<<grid_dim,h_datapoints,h_datapoints*sizeof(double),streams[1]>>>(d_params,d_lims2,d_result+number_of_integrals,d_result_part,d_w,d_x);
 	//Copy result back
 	cudaMemcpy(h_result,d_result,sizeof(double)*number_of_integrals*2,cudaMemcpyDeviceToHost);
 
