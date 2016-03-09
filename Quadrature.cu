@@ -112,8 +112,6 @@ __global__ void d_double_integral(double *d_params, double *d_limits, double *d_
 	d_result_part[blockIdx.x+gridDim.x*blockIdx.y]=d_result_temp[tid];
     }
 
-	__syncthreads();
-
 	tid=threadIdx.x+blockDim.x*blockIdx.y;
 
 	//Reduction over the second integral to obtain a value for the full double integral
