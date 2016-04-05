@@ -8,8 +8,8 @@
 #include <lapacke_utils.h>
 #include "Rate_Functions_CPU.h"
 
-#define ACC_J 16.35
-#define ACC_K 23.55
+#define ACC_J 19.013
+#define ACC_K 25.253
 #define ACC_L 6503.0
 
 
@@ -234,7 +234,7 @@ void gauss_integration_setup(int datapoints, double *weights, double *x,double *
 //Full collisional excitation calculation
 void h_j_gauss_integration(double T_e,double mu,double E_j,double *B_vector, int datapoints, double *h_j_up, double *weights, double *x)
 {	double integrand=0.0, E0, fermi, fermi_m, integ_temp;
-	double region_difference=(20.0+ACC_J*T_e);	
+	double region_difference=(E_j+2.0*fabs(mu)+ACC_J*T_e);	
 	int idx;
 
 
@@ -253,7 +253,7 @@ void h_j_gauss_integration(double T_e,double mu,double E_j,double *B_vector, int
 
 void h_k_gauss_integration(double T_e,double mu,double E_i,double *C_vector, int datapoints, double *k_up, double *weights, double *x)
 {	double integrand0=0.0, integrand1, E0, E1, E0prime, fermiE0, fermiE1, fermiE0prime, integ_temp;
-	double region_difference=(30.0+ACC_K*T_e);
+	double region_difference=(fabs(mu)+50.0+ACC_K*T_e);
 	int idx0,idx1;
 
    for(idx0=0;idx0<datapoints;idx0++)
