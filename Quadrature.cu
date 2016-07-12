@@ -144,8 +144,11 @@ double h_integral2_exact(double *h_params, double *h_limits)
 
 //Set up the nodes (x) and weights (w) of Gaussian quadrature, using the Golub Welsch algorithm
 //coeffs and vectors are allocated arrays which are required only for solving the tridiagonal matrix equation
-void gauss_integration_setup(int datapoints, double *weights, double *x,double *coeffs, double *vectors)
-{  int idx;
+void gauss_integration_setup(int datapoints, double *weights, double *x)
+{  int idx; double *coeffs, *vectors;
+
+  coeffs=(double*)malloc((datapoints-1)*sizeof(double));	
+  vectors=(double*)malloc(datapoints*datapoints*sizeof(double));
 
    x[0]=0.0;
    for (idx=1;idx<datapoints;idx++)
@@ -162,6 +165,78 @@ void gauss_integration_setup(int datapoints, double *weights, double *x,double *
 	x[idx]=0.5*(x[idx]+1.0);	//This leads to nodes in the range (0,1)
 	weights[idx]=vectors[idx]*vectors[idx];
 	}
+
+  free(coeffs);
+  free(vectors);
+}
+
+void gauss_integration_setup32(double *weights, double *x)
+{
+	x[0]=1.3680690752591596E-03;
+	x[1]=7.1942442273659202E-03;
+	x[2]=1.7618872206246805E-02;
+	x[3]=3.2546962031130167E-02;
+	x[4]=5.1839422116973843E-02;
+	x[5]=7.5316193133715015E-02;
+	x[6]=1.0275810201602886E-01;
+	x[7]=1.3390894062985509E-01;
+	x[8]=1.6847786653489233E-01;
+	x[9]=2.0614212137961868E-01;
+	x[10]=2.4655004553388526E-01;
+	x[11]=2.8932436193468253E-01;
+	x[12]=3.3406569885893617E-01;
+	x[13]=3.8035631887393162E-01;
+	x[14]=4.2776401920860185E-01;
+	x[15]=4.7584616715613093E-01;
+	x[16]=5.2415383284386907E-01;
+	x[17]=5.7223598079139815E-01;
+	x[18]=6.1964368112606838E-01;
+	x[19]=6.6593430114106378E-01;
+	x[20]=7.1067563806531764E-01;
+	x[21]=7.5344995446611462E-01;
+	x[22]=7.9385787862038115E-01;
+	x[23]=8.3152213346510750E-01;
+	x[24]=8.6609105937014474E-01;
+	x[25]=8.9724189798397114E-01;
+	x[26]=9.2468380686628515E-01;
+	x[27]=9.4816057788302599E-01;
+	x[28]=9.6745303796886994E-01;
+	x[29]=9.8238112779375319E-01;
+	x[30]=9.9280575577263397E-01;
+	x[31]=9.9863193092474067E-01;
+
+	weights[0]=3.5093050047349198E-03;
+	weights[1]=8.1371973654528751E-03;
+	weights[2]=1.2696032654631021E-02;
+	weights[3]=1.7136931456510726E-02;
+	weights[4]=2.1417949011113720E-02;
+	weights[5]=2.5499029631187890E-02;
+	weights[6]=2.9342046739268091E-02;
+	weights[7]=3.2911111388180682E-02;
+	weights[8]=3.6172897054423871E-02;
+	weights[9]=3.9096947893535162E-02;
+	weights[10]=4.1655962113473763E-02;
+	weights[11]=4.3826046502202044E-02;
+	weights[12]=4.5586939347882056E-02;
+	weights[13]=4.6922199540401971E-02;
+	weights[14]=4.7819360039637472E-02;
+	weights[15]=4.8270044257364274E-02;
+	weights[16]=4.8270044257363830E-02;
+	weights[17]=4.7819360039637784E-02;
+	weights[18]=4.6922199540401846E-02;
+	weights[19]=4.5586939347881918E-02;
+	weights[20]=4.3826046502201850E-02;
+	weights[21]=4.1655962113473798E-02;
+	weights[22]=3.9096947893534850E-02;
+	weights[23]=3.6172897054424745E-02;
+	weights[24]=3.2911111388180932E-02;
+	weights[25]=2.9342046739267064E-02;
+	weights[26]=2.5499029631188164E-02;
+	weights[27]=2.1417949011113362E-02;
+	weights[28]=1.7136931456510799E-02;
+	weights[29]=1.2696032654631212E-02;
+	weights[30]=8.1371973654529653E-03;
+	weights[31]=3.5093050047351631E-03;
 }
 
 int main(int argc,const char** argv)
@@ -178,12 +253,10 @@ int main(int argc,const char** argv)
 	cudaStreamCreate(&streams[1]);
 
 	//Declare, allocate and calculate nodes and weights for integration
-	double *h_x,*h_w,*h_c,*h_v;
+	double *h_x,*h_w;
 	h_x=(double*)malloc(h_datapoints*sizeof(double));		
 	h_w=(double*)malloc(h_datapoints*sizeof(double));
-	h_c=(double*)malloc((h_datapoints-1)*sizeof(double));	
-	h_v=(double*)malloc(h_datapoints*h_datapoints*sizeof(double));
-	gauss_integration_setup(h_datapoints,h_w,h_x,h_c,h_v);
+	gauss_integration_setup(h_datapoints,h_w,h_x);
 
 	//Copy nodes and weights to GPU
 	double *d_x, *d_w;
@@ -272,8 +345,6 @@ int main(int argc,const char** argv)
    //Clean up
    free(h_x);
    free(h_w);
-   free(h_c);
-   free(h_v);
    free(h_params);
    free(h_lims1);
    free(h_lims2);

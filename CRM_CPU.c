@@ -9,16 +9,13 @@
 #include <lapacke_mangling.h>
 #include <lapacke_utils.h>
 
-#ifndef ACC_P
-#define ACC_P 5
-#endif
 #include "Rate_Functions_CPU.h"
 
 int main(int argc,const char** argv)
 {
 
 //User-specified variables to be changed to modify the calculation
-int h_datapoints=32;
+int h_datapoints;
 double N_T=9E22; 		//cm^-3
 double max_time=5E-13;		//s
 double delta_time=1E-19;	//s
@@ -33,13 +30,13 @@ double *n_e, *T_e; double T_F, Internal_Energy;
 n_e=(double*)malloc((t_iterations+1)*sizeof(double));
 T_e=(double*)malloc((t_iterations+1)*sizeof(double));
 int states_number=15, ionizations_number=14, excitations_number=14;
-double *h_params, *E_i, *E_j, *A_vector, *B_vector1, *B_vector2, *C_vector, *D_vector;
-double *h_j, *h_k, *h_l, *h_x, *h_w,*h_c, *h_v;
+double *h_params, *E_i, *E_j, *A_vector, *B_vector, *C_vector, *D_vector;
+double *h_j, *h_k, *h_l, *h_x, *h_w;
 double *N, *N_temp1, *N_temp2, *N_temp3, *N_temp4, *IntE_temp, *R_1, *R_2, *charge_vector;
 int *excitations_indices, *ionizations_indices;
-h_allocate_arrays(states_number,ionizations_number,excitations_number,h_datapoints,&h_params,&charge_vector,&E_i,&E_j,&A_vector,&B_vector1,&B_vector2,&C_vector, &D_vector,&h_j, &h_k,&h_l,&h_w,&h_x,&h_c,&h_v,&N,&N_temp1,&N_temp2,&N_temp3,&N_temp4,&IntE_temp,&R_1,&R_2,&excitations_indices,&ionizations_indices);
-h_setup_atomic_model(ionizations_number,excitations_number,excitations_indices, ionizations_indices,charge_vector,E_i,E_j,A_vector,B_vector1,C_vector,D_vector);
-gauss_integration_setup(h_datapoints,h_w,h_x,h_c,h_v);
+gauss_integration_setup32(&h_datapoints,&h_w,&h_x);
+h_allocate_arrays(states_number,ionizations_number,excitations_number,h_datapoints,&h_params,&charge_vector,&E_i,&E_j,&A_vector,&B_vector,&C_vector, &D_vector,&h_j, &h_k,&h_l,&N,&N_temp1,&N_temp2,&N_temp3,&N_temp4,&IntE_temp,&R_1,&R_2,&excitations_indices,&ionizations_indices);
+h_setup_atomic_model(ionizations_number,excitations_number,excitations_indices, ionizations_indices,charge_vector,E_i,E_j,A_vector,B_vector,C_vector,D_vector);
 
 //Setup initial conditions - all atoms in ground state and temperature of 1 eV (for stability)
 for(idx=0;idx<states_number;idx++){N[idx]=0.0;}
@@ -62,7 +59,7 @@ for (idx_t=1;idx_t<=t_iterations;idx_t++)
 	//The current values of T_e, n_e are used by the RK-4 calculation and overwritten
 	T_e[idx_t]=T_e[idx_t-1];
 	n_e[idx_t]=n_e[idx_t-1];
-	h_solve_RK4(states_number, ionizations_number, excitations_number, delta_time, charge_vector, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp, n_e+idx_t, T_e+idx_t, &T_F, &Internal_Energy,h_datapoints,h_w,h_x, h_j, h_k, h_l, T_r, excitations_indices, ionizations_indices,E_i,E_j,A_vector, B_vector1, C_vector, D_vector, R_1, R_2);
+	h_solve_RK4(states_number, ionizations_number, excitations_number, delta_time, charge_vector, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp, n_e+idx_t, T_e+idx_t, &T_F, &Internal_Energy,h_datapoints,h_w,h_x, h_j, h_k, h_l, T_r, excitations_indices, ionizations_indices,E_i,E_j,A_vector, B_vector, C_vector, D_vector, R_1, R_2);
 	//Uncomment the following code to output the time-dependent level populations
 	//if (idx_t%output_frequency==0){
 	//	fprintf(OUTPUTFILE,"%E ",idx_t*delta_time); for(idx=0;idx<states_number;idx++){fprintf(OUTPUTFILE,"%E ",N[idx]);} fprintf(OUTPUTFILE,"\n");
@@ -76,7 +73,7 @@ for (idx_t=0;idx_t<=t_iterations;idx_t+=output_frequency)
 	}
 
 //Clean up memory
-h_cleanup(h_params, charge_vector, E_i, E_j,A_vector,B_vector, C_vector, D_vector, h_j, h_k, h_l, h_w, h_x, h_c, h_v, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp,  R_1, R_2, excitations_indices, ionizations_indices);
+h_cleanup(h_params, charge_vector, E_i, E_j,A_vector,B_vector, C_vector, D_vector, h_j, h_k, h_l, h_w, h_x, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp,  R_1, R_2, excitations_indices, ionizations_indices);
 
 exit(0);
 }
