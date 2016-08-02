@@ -89,7 +89,6 @@ __global__ void d_j_calc(double *d_params, double *E_j, double *B_vector, double
 	node_num=threadIdx.x % d_datapoints;
 	integral_num+=blockIdx.x*d_block_mult;
 	extern  __shared__ double d_j_up_temp[];	//Integrand is stored in shared memory
-	//double *d_j_up_temp=&temp[0];
 	double lim=(E_j[integral_num]+2.0*fabs(d_params[1])+ACC_J*d_params[0]);
 	double E0=x[node_num]*lim+E_j[integral_num];
 	double integrand=d_j_int(E0,E_j[integral_num],B_vector+integral_num*4)*w[node_num];
@@ -121,7 +120,6 @@ __global__ void d_j_calc_f(float *d_params, float *E_j, float *B_vector, float *
 	node_num=threadIdx.x % d_datapoints;
 	integral_num+=blockIdx.x*d_block_mult;
 	extern  __shared__ float d_j_up_tempf[];	//Integrand is stored in shared memory
-	//float *d_j_up_temp=&temp[0];
 	float lim=(E_j[integral_num]+2.0f*fabsf(d_params[1])+ACC_Jf*d_params[0]);
 	float E0=x[node_num]*lim+E_j[integral_num];
 	float integrand=d_j_int_f(E0,E_j[integral_num],B_vector+integral_num*4)*w[node_num];
@@ -155,7 +153,6 @@ __global__ void d_k_calc(double *d_params, double *E_i, double *C_vector,double 
 	node_num=threadIdx.x % d_datapoints;
 	integral_num+=blockIdx.x*d_block_mult;
 	extern  __shared__ double d_k_up_temp[];
-	//double *d_k_up_temp=&temp[0];
 	double lim=(fabs(d_params[1])+50.0+ACC_K*d_params[0]);
 	double E0prime=x[node_num]*lim;
 	double E0=E0prime+E_i[integral_num];
@@ -195,7 +192,6 @@ __global__ void d_k_calc_f(float *d_params, float *E_i, float *C_vector,float *d
 	node_num=threadIdx.x % d_datapoints;
 	integral_num+=blockIdx.x*d_block_mult;
 	extern  __shared__ float d_k_up_tempf[];
-	//float *d_k_up_temp=&temp[0];
 	float lim=(fabsf(d_params[1])+50.0f+ACC_Kf*d_params[0]);
 	float E0prime=x[node_num]*lim;
 	float E0=E0prime+E_i[integral_num];
@@ -236,7 +232,6 @@ __global__ void d_l_calc(double *d_params, double *E_i, double *D_vector, double
 	node_num=threadIdx.x % d_datapoints;
 	integral_num+=blockIdx.x*d_block_mult;
 	extern  __shared__ double d_l_temp[];
-	//double *d_l_temp=&temp[0];
 	double *d_le_temp=&d_l_temp[blockDim.x];
 	double lim=ACC_L;
 	if(d_params[1]>0.0){lim+=d_params[1];}

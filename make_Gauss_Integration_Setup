@@ -1,0 +1,1 @@
+gcc Gauss_Integration_Setup.c -o Gauss_Integration_Setup -lm -llapacke -llapack -lblas -lgfortran

@@ -4,11 +4,7 @@
 #include <math.h>
 #include <cuda.h>
 #include <time.h>
-#include <omp.h>
-#include <lapacke.h>
 #include <cblas.h>
-#include <lapacke_mangling.h>
-#include <lapacke_utils.h>
 
 extern "C" {  
 #include "Rate_Functions_CPU.h"
@@ -26,7 +22,7 @@ int h_datapoints;
 double N_T=9E22; 		//cm^-3
 double max_time=5E-13;		//s
 double delta_time=1E-19;	//s
-double T_r=300.0;
+double T_r=250.0;
 int output_frequency=10000;
 
 //CPU variables, memory allocation and construction of the atomic model, non user-specified
@@ -76,6 +72,10 @@ for (idx_t=1;idx_t<=t_iterations;idx_t++)
 	T_e[idx_t]=T_e[idx_t-1];
 	n_e[idx_t]=n_e[idx_t-1];
 	hd_solve_RK4(states_number, ionizations_number, excitations_number, delta_time, charge_vector, N, N_temp1, N_temp2, N_temp3, N_temp4, IntE_temp, n_e+idx_t, T_e+idx_t, &T_F, &Internal_Energy,h_datapoints,h_w,h_x, h_j, h_k, h_l, T_r, excitations_indices, ionizations_indices,E_i,E_j,A_vector, B_vector, C_vector, D_vector, R_1, R_2,h_params, d_params, d_B_vector,d_C_vector, d_D_vector, d_E_j, d_E_i, d_j, d_k, d_k_part, d_l, d_x, d_w,streams);
+	//Uncomment the following code to output the time-dependent level populations
+	//if (idx_t%output_frequency==0){
+	//	fprintf(OUTPUTFILE,"%E ",idx_t*delta_time); for(idx=0;idx<states_number;idx++){fprintf(OUTPUTFILE,"%E ",N[idx]);} fprintf(OUTPUTFILE,"\n");
+	//		}
   }
 
 //Output n_e, T_e

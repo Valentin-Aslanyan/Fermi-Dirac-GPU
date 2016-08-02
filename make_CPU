@@ -1,1 +1,1 @@
-gcc CRM_CPU.c Rate_Functions_CPU.c -o CRM_CPU -lm -llapacke -llapack -lblas -lgfortran
+gcc CRM_CPU.c Rate_Functions_CPU.c -o CRM_CPU -lm -lblas
