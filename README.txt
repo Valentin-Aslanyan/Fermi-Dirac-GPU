@@ -52,7 +52,7 @@ make_GPU		-	makefile for CRM.cu, compiling with nvcc (nVidia compiler) and requi
 | Benchmarking GPU code   |
 ---------------------------
 
-We include several files to benchmark the computation speed of various GPUs in single and double precision.
+We include several standalone files to benchmark the computation speed of various GPUs in single and double precision.
 
 Generate_Test_Levels.c	-	Create fictitious atomic levels and cross-sectional data (for 100 000 collisional ionization, excitation and photionization transitions) to allow benchmarking an arbitrarily large atomic model. Outputs data into Test_Ionization_Coeffs.txt and Test_Excitation_Coeffs.txt.
 

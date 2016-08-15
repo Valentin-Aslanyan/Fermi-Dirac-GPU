@@ -1,15 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <time.h>
 #include <math.h>
 #include <cuda.h>
-#include <time.h>
-#include <cblas.h>
-
-extern "C" {  
-#include "Rate_Functions_CPU.h"
-}
-#include "Rate_Functions_GPU.h"
 
 #define ACC_J 19.013
 #define ACC_K 25.253
